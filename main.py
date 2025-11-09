@@ -15,6 +15,7 @@ font = pygame.font.Font('fonts/FRAHV.TTF', 22)
 
 while True:
 
+    game.play_bgm()
     game.draw_field()
     snake.move()
 

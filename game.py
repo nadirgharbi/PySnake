@@ -15,3 +15,8 @@ class Game:
                     pygame.draw.rect(window, BLUE_DARK, (x, y, squares, squares))
                 else:
                     pygame.draw.rect(window, BLUE_LIGHT, (x, y, squares, squares))
+    
+    def play_bgm(self):
+        if not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load("assets/music/snake_music.wav")
+            pygame.mixer.music.play(-1, 0, 1)
