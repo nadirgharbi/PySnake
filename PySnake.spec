@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='PySnake.exe',
+    name='PySnake',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

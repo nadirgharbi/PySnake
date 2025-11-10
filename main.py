@@ -1,41 +1,42 @@
 import sys
-import pygame, random
+import pygame
 from const import *
 from game import Game
 from snake import Snake
 from apples import Apples
 
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
+# pygame.mixer.set_num_channels(8)
 
 game = Game()
-snake = Snake(squares * 5, squares * 10)
+game.play_bgm()
+
+snake = Snake(squares * 6, squares * 10)
 apples = Apples()
 
-font = pygame.font.Font('fonts/FRAHV.TTF', 22)
+font = pygame.font.Font(FONT_SYS, 32)
 
 while True:
-
-    game.play_bgm()
     game.draw_field()
+
+    # Update mouvement tête + propagation au corps
     snake.move()
 
     if snake.direction == 'RIGHT' and snake.head_rect.x < WIDTH - squares:
         snake.head_rect.x += snake.speed
-
     if snake.direction == 'LEFT' and snake.head_rect.x > 0:
         snake.head_rect.x -= snake.speed
-
     if snake.direction == 'UP' and snake.head_rect.y > 0:
         snake.head_rect.y -= snake.speed
-
     if snake.direction == 'DOWN' and snake.head_rect.y < HEIGHT - squares:
         snake.head_rect.y += snake.speed
 
+    # Gestion des événements (UNIQUEMENT entrées/sorties, pas de gameplay ici)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT and snake.direction != 'LEFT':
                 snake.direction = 'RIGHT'
@@ -46,33 +47,19 @@ while True:
             elif event.key == pygame.K_DOWN and snake.direction != 'UP':
                 snake.direction = 'DOWN'
 
-        if snake.head_rect.colliderect(apples.image_rect):
-            print(snake.speed)
-            snake.speed += 0.1
-            game.score += 1
-            apples.image_rect.x = random.randrange(1, FIELD_SIZE - 1) * squares
-            apples.image_rect.y = random.randrange(1, FIELD_SIZE - 1) * squares
-            snake.grow()
+    # COLLISION vérifiée chaque frame (et plus dans la boucle d’événements)
+    game.check_collide(snake, apples)
 
-    # Game over si le joueur sort de l'ecran ou touche son corps
-    if snake.head_rect.x <= 0:
+    # Game over murs
+    if game.is_game_over(snake):
         pygame.quit()
-    if snake.head_rect.x >= WIDTH - squares:
-        pygame.quit()
-    if snake.head_rect.y >= HEIGHT - squares:
-        pygame.quit()
-    if snake.head_rect.y <= 0:
-        pygame.quit()
+        sys.exit()
 
     window.blit(snake.head, snake.head_rect)
     window.blit(apples.image, apples.image_rect)
 
-    # Dessiner les segments du corps du serpent
     for segment in snake.body_segments:
         window.blit(snake.body, segment)
-
-    if len(snake.body_segments) < 4:
-        snake.grow()
 
     display_score = font.render(f'SCORE : {game.score}', True, BLACK)
     window.blit(display_score, (10, 20))
